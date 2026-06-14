@@ -23,7 +23,7 @@ uv venv --python 3.12 "$AppDir\.venv"
 $Py = "$AppDir\.venv\Scripts\python.exe"
 
 Write-Host "   Downloading and installing dependencies (~200 MB, one time)..."
-uv pip install --python "$Py" "editmyraw @ $Tarball"
+uv pip install --python "$Py" "editmyraw[desktop] @ $Tarball"
 
 $Launcher = "$env:USERPROFILE\Desktop\EditMyRaw.cmd"
 "@echo off`r`n`"$Py`" -m editmyraw.cli web" | Set-Content -Encoding ASCII $Launcher

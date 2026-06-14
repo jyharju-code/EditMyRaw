@@ -33,7 +33,7 @@ PY="$APP_DIR/.venv/bin/python"
 
 # 3) Install EditMyRaw + dependencies (~200 MB).
 echo "   Downloading and installing dependencies (~200 MB, one time)…"
-"$UV" pip install --python "$PY" "editmyraw @ $REPO_TARBALL"
+"$UV" pip install --python "$PY" "editmyraw[desktop] @ $REPO_TARBALL"
 
 # 4) Desktop launcher.
 cat > "$LAUNCHER" <<EOF

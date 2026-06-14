@@ -10,7 +10,7 @@ rm -rf build dist .venv-build EditMyRaw.spec
 python3 -m venv .venv-build
 .venv-build/bin/pip install -q --upgrade pip
 echo "   Installing app + PyInstaller…"
-.venv-build/bin/pip install -q . pyinstaller
+.venv-build/bin/pip install -q ".[desktop]" pyinstaller
 echo "   Bundling…"
 .venv-build/bin/pyinstaller --noconfirm --clean --windowed --name EditMyRaw \
   --osx-bundle-identifier com.jyharju.editmyraw \

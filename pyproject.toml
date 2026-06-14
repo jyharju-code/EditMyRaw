@@ -17,11 +17,11 @@ dependencies = [
     "flask>=3.0",
     "google-genai>=1.0",
     "pydantic>=2.5",
-    "pywebview>=5.0",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
+desktop = ["pywebview>=5.0"]  # native window; not needed for headless/server use
 
 [project.scripts]
 editmyraw = "editmyraw.cli:main"
