@@ -33,7 +33,20 @@ Resolution order: GUI-saved key → `GEMINI_API_KEY` environment variable → no
 
 > If a key was ever shared in chat or logs, rotate it in Google AI Studio.
 
-## Install
+## Quick install (macOS — for anyone)
+
+Paste this one line into Terminal. It fetches a managed Python and all dependencies
+(~200 MB, one time), and puts an `EditMyRaw.command` launcher on your Desktop:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/jyharju-code/EditMyRaw/main/install.sh | bash
+```
+
+No Xcode tools or pre-installed Python needed (it uses [uv](https://docs.astral.sh/uv/)).
+Then double-click the launcher and add a free [Gemini API key](https://aistudio.google.com/apikey)
+in the app's settings panel. To update later, just run the same line again.
+
+## Install from source (developers)
 
 ```bash
 python3 -m venv .venv && source .venv/bin/activate
