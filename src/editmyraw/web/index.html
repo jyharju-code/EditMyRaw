@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EditMyRaw</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <header class="topbar">
+    <div>
+      <h1>EditMyRaw</h1>
+      <p class="sub">Gemini-guided RAW/JPG editing — example, prompt, or combination</p>
+    </div>
+    <button id="keyChip" class="chip" title="API key settings">Key: …</button>
+  </header>
+
+  <!-- API KEY -->
+  <details class="card" id="settings">
+    <summary>API key &amp; models</summary>
+    <div class="card-body">
+      <p class="hint">Your key is stored locally only (<code id="cfgPath">~/.editmyraw/config.json</code>,
+        permissions 600) and is never committed. Resolution order: saved key → <code>GEMINI_API_KEY</code> env var.</p>
+      <div class="row">
+        <span class="lbl">Current key</span>
+        <span id="keyState" class="badge">unknown</span>
+      </div>
+      <div class="row">
+        <span class="lbl">Set key</span>
+        <input type="password" id="keyInput" class="grow" placeholder="Paste Gemini API key (AIza… or AQ.…)" autocomplete="off" />
+        <button id="keySave" class="primary small">Save</button>
+        <button id="keyTest" class="small">Test</button>
+        <button id="keyClear" class="small ghost">Clear</button>
+      </div>
+      <div class="row">
+        <span class="lbl">Recipe model</span>
+        <select id="model"></select>
+        <span class="lbl">Image model</span>
+        <select id="imageModel"></select>
+      </div>
+      <div id="keyMsg" class="hint"></div>
+    </div>
+  </details>
+
+  <!-- SOURCES -->
+  <div class="card">
+    <h2>Sources</h2>
+    <div class="row">
+      <span class="lbl">Target images</span>
+      <span id="inPath" class="path empty">none selected</span>
+      <button id="pickFiles">Choose images…</button>
+      <button id="pickFolder">Choose folder…</button>
+    </div>
+    <div class="row">
+      <span class="lbl">Reference</span>
+      <span id="refPath" class="path empty">none</span>
+      <button id="pickRef">Choose…</button>
+      <button id="refClear" class="ghost small">Clear</button>
+    </div>
+    <div class="row">
+      <span class="lbl">Output folder</span>
+      <span id="outPath" class="path empty">—</span>
+      <button id="pickOut">Choose…</button>
+    </div>
+  </div>
+
+  <!-- WORKFLOW -->
+  <div class="card">
+    <h2>How to edit</h2>
+    <div class="row">
+      <div class="seg" id="workflow">
+        <label><input type="radio" name="wf" value="prompt" checked><span>Prompt</span></label>
+        <label><input type="radio" name="wf" value="example"><span>Example</span></label>
+        <label><input type="radio" name="wf" value="combo"><span>Combination</span></label>
+      </div>
+      <div class="seg" id="mode">
+        <label><input type="radio" name="md" value="faithful" checked><span>Faithful</span></label>
+        <label><input type="radio" name="md" value="creative"><span>Creative</span></label>
+      </div>
+    </div>
+    <div class="row">
+      <textarea id="prompt" rows="3" class="grow"
+        placeholder="Describe the look, e.g. 'Warm cinematic edit, lift shadows, keep skin tones natural.'"></textarea>
+    </div>
+    <div class="grid">
+      <label class="field"><span class="lbl">Skin weighting</span>
+        <select id="skin"><option value="face">Face + skin</option><option value="skin">Skin color</option><option value="none">Whole image</option></select>
+      </label>
+      <label class="field"><span class="lbl">Look strength</span>
+        <input type="range" id="strength" min="0" max="1" step="0.05" value="0.85"><span id="strVal" class="badge">0.85</span>
+      </label>
+      <label class="field"><span class="lbl">Format</span>
+        <select id="format"><option value="jpg">JPEG (8-bit) — default</option><option value="tiff">16-bit TIFF</option></select>
+      </label>
+      <label class="field"><span class="lbl" id="qLbl">JPEG quality</span>
+        <input type="range" id="quality" min="60" max="100" step="1" value="95"><span id="qVal" class="badge">95</span>
+      </label>
+      <label class="field toggle"><span class="switch"><input type="checkbox" id="consistency" checked><span class="sl"></span></span>
+        <span>Batch consistency (AI, hidden)</span><input type="number" id="rounds" min="1" max="4" value="2" class="rounds"></label>
+      <label class="field toggle"><span class="switch"><input type="checkbox" id="generative"><span class="sl"></span></span>
+        <span>Allow generative edit (Creative)</span></label>
+      <label class="field toggle"><span class="switch"><input type="checkbox" id="dryrun"><span class="sl"></span></span>
+        <span>Dry run (no Gemini)</span></label>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button id="run" class="primary big">▶ Edit &amp; export</button>
+    <button id="openOut" class="ghost">Open output folder</button>
+    <a id="zipLink" class="ghost btnlink" hidden>Download ZIP</a>
+    <div class="progress"><div id="bar"></div></div>
+  </div>
+  <div id="status">Ready.</div>
+
+  <div class="card" id="resultsCard" style="display:none">
+    <h2>Before / after</h2>
+    <div id="results"></div>
+  </div>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

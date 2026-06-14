@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "editmyraw"
+version = "0.1.0"
+description = "Gemini-guided RAW/JPG editing: example, prompt, or combination, with batch consistency."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = [
+    "rawpy>=0.21",
+    "pillow>=10",
+    "numpy>=1.24",
+    "opencv-python-headless>=4.8",
+    "flask>=3.0",
+    "google-genai>=1.0",
+    "pydantic>=2.5",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
+[project.scripts]
+editmyraw = "editmyraw.cli:main"
+editmyraw-web = "editmyraw.server:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+editmyraw = ["web/*"]

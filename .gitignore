@@ -1,0 +1,11 @@
+.venv/
+__pycache__/
+*.pyc
+exports/
+EditMyRaw-exports/
+build/
+dist/
+*.egg-info/
+.env
+.secrets*
+# API key is stored in ~/.editmyraw/config.json (outside the repo) — never here.
