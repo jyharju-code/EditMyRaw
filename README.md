@@ -46,6 +46,14 @@ No Xcode tools or pre-installed Python needed (it uses [uv](https://docs.astral.
 Then double-click the launcher and add a free [Gemini API key](https://aistudio.google.com/apikey)
 in the app's settings panel. To update later, just run the same line again.
 
+## Standalone app (Apple Silicon, no Terminal)
+
+Prefer a double-click app? Download `EditMyRaw-app.zip` from the
+[latest release](https://github.com/jyharju-code/EditMyRaw/releases/latest), unzip,
+and move `EditMyRaw.app` to Applications. First launch: right-click → **Open** (it's
+unsigned, so Gatekeeper asks once). Apple Silicon only (~235 MB) — on Intel Macs use
+the one-line installer above. Build it yourself with `./build_app.sh` (PyInstaller).
+
 ## Install from source (developers)
 
 ```bash
