@@ -9,6 +9,7 @@ import os
 import queue
 import socket
 import subprocess
+import sys
 import threading
 import traceback
 import webbrowser
@@ -110,10 +111,53 @@ _PICK = {
 }
 
 
+def _tk_pick(kind):
+    """Cross-platform native picker (Windows/Linux) via tkinter."""
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+    except Exception:
+        return []
+    root = tk.Tk()
+    root.withdraw()
+    try:
+        root.attributes("-topmost", True)
+    except Exception:
+        pass
+    try:
+        if kind == "files":
+            res = list(root.tk.splitlist(filedialog.askopenfilenames(title="Choose images")))
+        elif kind == "folder":
+            d = filedialog.askdirectory(title="Choose folder")
+            res = [d] if d else []
+        else:
+            f = filedialog.askopenfilename(title="Choose reference image")
+            res = [f] if f else []
+    finally:
+        root.destroy()
+    return [p for p in res if p]
+
+
+def _pick_paths(kind):
+    # macOS: native osascript dialog. Other platforms: tkinter.
+    if sys.platform == "darwin":
+        return _osa(_PICK.get(kind, _PICK["file"]))
+    return _tk_pick(kind)
+
+
+def _reveal(path):
+    if sys.platform == "darwin":
+        subprocess.run(["open", path])
+    elif sys.platform.startswith("win"):
+        os.startfile(path)  # noqa: type
+    else:
+        subprocess.run(["xdg-open", path])
+
+
 @app.post("/pick")
 def pick():
     kind = (request.get_json(force=True) or {}).get("kind", "file")
-    paths = _osa(_PICK.get(kind, _PICK["file"]))
+    paths = _pick_paths(kind)
     if kind == "folder":
         return jsonify({"paths": paths, "expanded": pipeline.expand_inputs(paths) if paths else []})
     return jsonify({"paths": paths})
@@ -123,7 +167,7 @@ def pick():
 def openfolder():
     d = (request.get_json(force=True) or {}).get("dir", "")
     if d and os.path.isdir(d):
-        subprocess.run(["open", d])
+        _reveal(d)
         return jsonify({"ok": True})
     return jsonify({"ok": False})
 

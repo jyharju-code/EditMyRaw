@@ -33,26 +33,37 @@ Resolution order: GUI-saved key → `GEMINI_API_KEY` environment variable → no
 
 > If a key was ever shared in chat or logs, rotate it in Google AI Studio.
 
-## Quick install (macOS — for anyone)
+## Quick install (one line — for anyone)
 
-Paste this one line into Terminal. It fetches a managed Python and all dependencies
-(~200 MB, one time), and puts an `EditMyRaw.command` launcher on your Desktop:
+Fetches a managed Python and all dependencies (~200 MB, one time) and puts a
+launcher on your Desktop. No pre-installed Python needed (uses [uv](https://docs.astral.sh/uv/)).
 
+**macOS** — in Terminal:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/jyharju-code/EditMyRaw/main/install.sh | bash
 ```
 
-No Xcode tools or pre-installed Python needed (it uses [uv](https://docs.astral.sh/uv/)).
+**Windows** — in PowerShell:
+```powershell
+irm https://raw.githubusercontent.com/jyharju-code/EditMyRaw/main/install.ps1 | iex
+```
+
 Then double-click the launcher and add a free [Gemini API key](https://aistudio.google.com/apikey)
-in the app's settings panel. To update later, just run the same line again.
+in the app's settings panel. To update later, run the same line again.
 
-## Standalone app (Apple Silicon, no Terminal)
+## Standalone apps (no Terminal)
 
-Prefer a double-click app? Download `EditMyRaw-app.zip` from the
-[latest release](https://github.com/jyharju-code/EditMyRaw/releases/latest), unzip,
-and move `EditMyRaw.app` to Applications. First launch: right-click → **Open** (it's
-unsigned, so Gatekeeper asks once). Apple Silicon only (~235 MB) — on Intel Macs use
-the one-line installer above. Build it yourself with `./build_app.sh` (PyInstaller).
+Prefer a double-click app? Grab the build for your platform from the
+[latest release](https://github.com/jyharju-code/EditMyRaw/releases/latest):
+
+- `EditMyRaw-macOS-AppleSilicon.zip` — Apple Silicon Macs
+- `EditMyRaw-macOS-Intel.zip` — Intel Macs
+- `EditMyRaw-Windows.zip` — Windows 10/11
+
+Unzip and run. First launch is unsigned, so the OS warns once: macOS → right-click →
+**Open**; Windows → "More info" → **Run anyway**. These are built automatically for every
+release by GitHub Actions (`.github/workflows/build.yml`); build locally on macOS with
+`./build_app.sh`.
 
 ## Install from source (developers)
 
