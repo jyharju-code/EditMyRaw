@@ -17,6 +17,7 @@ echo "   Bundling…"
   --collect-all cv2 \
   --collect-all rawpy \
   --collect-all google \
+  --collect-all webview \
   --collect-submodules google.genai \
   --collect-data certifi \
   --collect-data editmyraw \

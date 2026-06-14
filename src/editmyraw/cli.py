@@ -32,13 +32,19 @@ def main(argv=None) -> None:
     k.add_argument("--show", action="store_true")
     k.add_argument("--clear", action="store_true")
 
-    sub.add_parser("web", help="Launch the browser GUI.")
+    w = sub.add_parser("web", help="Launch the desktop app (native window).")
+    w.add_argument("--browser", action="store_true",
+                   help="Open in a browser tab instead of a native window.")
 
     args = parser.parse_args(argv)
 
     if args.cmd == "web":
-        from .server import main as web_main
-        web_main()
+        if getattr(args, "browser", False):
+            from .server import main as web_main
+            web_main()
+        else:
+            from .desktop import run_desktop
+            run_desktop()
         return
 
     if args.cmd == "key":
