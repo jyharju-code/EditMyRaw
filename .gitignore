@@ -9,4 +9,6 @@ dist/
 *.egg-info/
 .env
 .secrets*
+.DS_Store
+EditMyRaw.spec
 # API key is stored in ~/.editmyraw/config.json (outside the repo) — never here.
