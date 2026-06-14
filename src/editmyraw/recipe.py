@@ -1,11 +1,26 @@
-"""recipe.py — the bounded editing recipe (tone + geometry/proportion + crop)."""
+"""
+recipe.py — the editing recipe (tone + geometry/proportion + crop).
+
+The model itself is LENIENT: it accepts whatever Gemini returns (no hard min/max
+on fields) so validation never rejects a slightly out-of-range value. All safety
+clamping happens in bounded_for_mode(), which pins every value to a safe range
+per mode. BBox coordinates are clamped to 0..1 in a validator.
+"""
 
 from __future__ import annotations
 
 from enum import Enum
 from typing import Optional
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+
+def clamp(value: float, minimum: float, maximum: float) -> float:
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return minimum
+    return max(minimum, min(maximum, value))
 
 
 class Mode(str, Enum):
@@ -14,15 +29,18 @@ class Mode(str, Enum):
 
 
 class BBox(BaseModel):
-    """Normalized bounding box, left/top/right/bottom in 0..1."""
-
-    left: float = Field(0.15, ge=0.0, le=1.0)
-    top: float = Field(0.05, ge=0.0, le=1.0)
-    right: float = Field(0.85, ge=0.0, le=1.0)
-    bottom: float = Field(0.95, ge=0.0, le=1.0)
+    model_config = ConfigDict(extra="ignore")
+    left: float = 0.15
+    top: float = 0.05
+    right: float = 0.85
+    bottom: float = 0.95
 
     @model_validator(mode="after")
-    def ensure_valid_order(self) -> "BBox":
+    def ensure_valid(self) -> "BBox":
+        self.left = clamp(self.left, 0.0, 1.0)
+        self.top = clamp(self.top, 0.0, 1.0)
+        self.right = clamp(self.right, 0.0, 1.0)
+        self.bottom = clamp(self.bottom, 0.0, 1.0)
         if self.right <= self.left:
             self.right = min(1.0, self.left + 0.1)
         if self.bottom <= self.top:
@@ -31,39 +49,41 @@ class BBox(BaseModel):
 
 
 class Corrections(BaseModel):
-    lens_distortion: float = Field(0.0, ge=-0.18, le=0.18,
-                                   description="Radial correction; negative reduces barrel distortion.")
-    vertical_perspective: float = Field(0.0, ge=-0.22, le=0.22)
-    horizontal_perspective: float = Field(0.0, ge=-0.18, le=0.18)
-    rotation_degrees: float = Field(0.0, ge=-6.0, le=6.0)
-    subject_width_scale: float = Field(1.0, ge=0.82, le=1.18)
-    subject_height_scale: float = Field(1.0, ge=0.88, le=1.12)
-    face_width_scale: float = Field(1.0, ge=0.86, le=1.14)
-    upper_body_scale: float = Field(1.0, ge=0.86, le=1.14)
-    crop_ratio: str = Field("original", description="original, 1:1, 4:5, 3:2, 16:9, or 9:16")
-    confidence: float = Field(0.5, ge=0.0, le=1.0)
+    model_config = ConfigDict(extra="ignore")
+    lens_distortion: float = 0.0
+    vertical_perspective: float = 0.0
+    horizontal_perspective: float = 0.0
+    rotation_degrees: float = 0.0
+    subject_width_scale: float = 1.0
+    subject_height_scale: float = 1.0
+    face_width_scale: float = 1.0
+    upper_body_scale: float = 1.0
+    crop_ratio: str = "original"
+    confidence: float = 0.5
 
     @field_validator("crop_ratio")
     @classmethod
     def normalize_crop_ratio(cls, value: str) -> str:
-        normalized = value.strip().lower()
+        normalized = str(value).strip().lower()
         return normalized if normalized in {"original", "1:1", "4:5", "3:2", "16:9", "9:16"} else "original"
 
 
 class ToneAdjustments(BaseModel):
-    exposure_ev: float = Field(0.0, ge=-2.0, le=2.0)
-    contrast: float = Field(0.0, ge=-1.0, le=1.0)
-    highlights: float = Field(0.0, ge=-1.0, le=1.0)
-    shadows: float = Field(0.0, ge=-1.0, le=1.0)
-    saturation: float = Field(1.0, ge=0.0, le=2.2)
-    temperature: float = Field(0.0, ge=-1.0, le=1.0)
-    tint: float = Field(0.0, ge=-1.0, le=1.0)
-    clarity: float = Field(0.0, ge=-1.0, le=1.0)
-    vignette: float = Field(0.0, ge=-1.0, le=1.0)
-    style_match_strength: float = Field(0.85, ge=0.0, le=1.0)
+    model_config = ConfigDict(extra="ignore")
+    exposure_ev: float = 0.0
+    contrast: float = 0.0
+    highlights: float = 0.0
+    shadows: float = 0.0
+    saturation: float = 1.0
+    temperature: float = 0.0
+    tint: float = 0.0
+    clarity: float = 0.0
+    vignette: float = 0.0
+    style_match_strength: float = 0.85
 
 
 class Recipe(BaseModel):
+    model_config = ConfigDict(extra="ignore")
     mode: Mode = Mode.faithful
     diagnosis: str = ""
     subject_bbox: BBox = Field(default_factory=BBox)
@@ -116,11 +136,8 @@ class Recipe(BaseModel):
             t.clarity = clamp(t.clarity, -0.65, 0.75)
             t.vignette = clamp(t.vignette, -0.75, 0.75)
             t.style_match_strength = clamp(t.style_match_strength, 0.0, 1.0)
+        c.confidence = clamp(c.confidence, 0.0, 1.0)
         return recipe
-
-
-def clamp(value: float, minimum: float, maximum: float) -> float:
-    return max(minimum, min(maximum, value))
 
 
 def neutral_recipe(mode: Mode = Mode.faithful, prompt: str = "") -> Recipe:

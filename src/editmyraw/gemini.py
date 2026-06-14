@@ -96,11 +96,20 @@ class GeminiClient:
             config=types.GenerateContentConfig(
                 response_mime_type="application/json", response_schema=RECIPE_SCHEMA),
         )
+        from pydantic import ValidationError
+        from .recipe import neutral_recipe
         try:
             payload = json.loads(response.text)
-        except (json.JSONDecodeError, TypeError) as exc:
-            raise RuntimeError(f"Gemini returned non-JSON: {str(response.text)[:300]}") from exc
-        return Recipe.model_validate(payload).bounded_for_mode(mode)
+        except (json.JSONDecodeError, TypeError):
+            payload = None
+        if isinstance(payload, dict):
+            try:
+                return Recipe.model_validate(payload).bounded_for_mode(mode)
+            except ValidationError:
+                pass
+        rec = neutral_recipe(mode, "")
+        rec.diagnosis = "Gemini reply could not be parsed into a valid recipe; applied a neutral edit."
+        return rec
 
     # -- generative pixel edit (Creative mode, optional) --
     def creative_edit(self, image: Image.Image, prompt: str,
