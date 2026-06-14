@@ -191,7 +191,7 @@ def _worker(job_id, cfg):
             "stem": oc.stem, "before": _data_url(oc.before), "after": _data_url(oc.after),
             "generated": oc.generated, "diagnosis": oc.recipe.diagnosis,
             "recipe": oc.recipe.model_dump(mode="json"),
-        } for oc in res["outcomes"]]
+        } for oc in res["outcomes"][:48]]  # cap browser preview; all files are on disk
         q.put({"type": "done", "count": res["count"], "out_dir": res["out_dir"],
                "zip": res["zip_path"], "gemini_log": res["gemini_log"],
                "global_tone": res["global_tone"], "key_source": res["key_source"], "rows": rows})

@@ -106,7 +106,8 @@ function listen(jobId){
 
 function render(d){
   let extra = d.gemini_log && d.gemini_log.length ? "  ·  AI: "+d.gemini_log[d.gemini_log.length-1] : "";
-  $("#status").innerHTML = `Done — <b>${d.count}</b> image(s) in ${d.out_dir}${extra}`;
+  const capped = d.rows.length < d.count ? ` (showing first ${d.rows.length})` : "";
+  $("#status").innerHTML = `Done — <b>${d.count}</b> image(s) in ${d.out_dir}${capped}${extra}`;
   if(d.zip){ const z=$("#zipLink"); z.hidden=false; z.textContent="ZIP ready — open folder"; z.onclick=()=>api("/openfolder",{dir:d.out_dir}); }
   const box = $("#results"); box.innerHTML="";
   d.rows.forEach(r=>{
